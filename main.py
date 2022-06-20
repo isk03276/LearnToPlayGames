@@ -1,6 +1,6 @@
 import argparse
 
-from utils.rllib import save_model, load_model, make_folder_name
+from utils.rllib import save_model, load_model, make_folder_name, get_ppo_config
 
 import ray
 from ray import tune
@@ -19,11 +19,8 @@ def run(config):
     env_id = config.env_id
     env_generator = get_env_generator(env_id) 
     tune.register_env(env_id, lambda _: env_generator(env_id, config.render))
+    trainer = ppo.PPOTrainer(env=env_id, config=get_ppo_config())
     
-    rllib_config = ppo.DEFAULT_CONFIG.copy()
-    rllib_config['framework'] = config.ml_framework
-    
-    trainer = ppo.PPOTrainer(env=env_id, config=rllib_config)
     if config.load_from is not None:
         load_model(trainer, config.load_from)
     path_to_save = "checkpoints/" + make_folder_name()
