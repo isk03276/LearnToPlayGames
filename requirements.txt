@@ -1,0 +1,9 @@
+numpy
+
+# game env
+gym
+gym-tetris
+nes-py
+
+# ML
+ray[rllib]
