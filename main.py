@@ -23,15 +23,13 @@ def run(config):
     
     trainer = ppo.PPOTrainer(env=env_id, config=rllib_config)
 
-    status = "{:2d} reward {:6.2f}/{:6.2f}/{:6.2f} len {:4.2f}"
+    status = "{:2d} reward {:6.2f} len {:4.2f}"
     
     for n in range(10000):
         result = trainer.train()
         print(status.format(
             n + 1,
-            result["episode_reward_min"],
             result["episode_reward_mean"],
-            result["episode_reward_max"],
             result["episode_len_mean"],
         ))
     
