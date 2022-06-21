@@ -27,8 +27,4 @@ The trained models are saved in the "checkpoints" directory.
 $ python main.py --test --load-from TRAINED_MODEL_PATH
 ~~~
 
-<<<<<<< HEAD
 ### Experiments
-=======
-## Experiments
->>>>>>> edb9033044e8879afd1cc62d1dc05935524c6138
