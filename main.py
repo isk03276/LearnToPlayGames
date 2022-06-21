@@ -13,7 +13,33 @@ def get_env_generator(env_id:str):
     else:
         raise NotImplementedError
     return env_generator
+
+def train(trainer, learning_iteration_num, to_save, save_interval):
+    path_to_save = "checkpoints/" + make_folder_name()
+
+    status = "{:2d} reward {:6.2f} len {:4.2f}"
     
+    for iter in range(1, learning_iteration_num + 1):
+        result = trainer.train()
+        print(status.format(
+            iter,
+            result["episode_reward_mean"],
+            result["episode_len_mean"],
+        ))
+        if to_save and iter % save_interval == 0:
+            save_model(trainer, path_to_save)
+    
+def test(env, trainer, test_num):
+    for ep in range(test_num):
+        done = False
+        obs = env.reset()
+        rews = []
+        while not done:
+            action = trainer.compute_action(obs)
+            obs, rew, done, _ = env.step(action)
+            rews.append(rew)
+        print("[{}/{}] Episde | rew : {}".format(ep + 1, test_num, sum(rews)/len(rews)))
+
 def run(config):
     ray.init()
     env_id = config.env_id
@@ -23,21 +49,14 @@ def run(config):
     
     if config.load_from is not None:
         load_model(trainer, config.load_from)
-    path_to_save = "checkpoints/" + make_folder_name()
-
-    status = "{:2d} reward {:6.2f} len {:4.2f}"
-    
-    for n in range(10000):
-        result = trainer.train()
-        print(status.format(
-            n + 1,
-            result["episode_reward_mean"],
-            result["episode_len_mean"],
-        ))
-        if args.save:
-            save_model(trainer, path_to_save)
+        
+    if not args.test:
+        train(trainer, config.learning_iteration_num, config.save, config.save_interval)
+    test_env = env_generator(env_id, render=True)
+    test(test_env, trainer, config.test_num)
     
     ray.shutdown()
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Game environments to learn")
@@ -46,7 +65,12 @@ if __name__ == "__main__":
     parser.add_argument("--render", action="store_true", help="Turn on rendering")
     #model
     parser.add_argument("--save", action="store_true", help="Whether to save the model")
+    parser.add_argument("--save-interval", type=int, default=20, help="Model save interval")
     parser.add_argument("--load-from", type=str, help="Path to load the model")
+    #train/test
+    parser.add_argument("--learning-iteration-num", type=int, default=100000, help="Number of iteration to train the model")
+    parser.add_argument("--test", action="store_true", help="Whether to test the model")
+    parser.add_argument("--test-num", type=int, default=10, help="Number of episodes to test the model")
     
     args = parser.parse_args()
     run(args)

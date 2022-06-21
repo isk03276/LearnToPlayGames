@@ -7,7 +7,7 @@ from ray.rllib.agents import ppo
 def get_ppo_config(framework:str = "torch",
                    num_workers:int = 8,
                    vf_share_layers:bool = True,
-                   use_lstm:bool = True,
+                   use_lstm:bool = False,
                    lstm_cell_size:int = 256)-> dict:
     
     """
