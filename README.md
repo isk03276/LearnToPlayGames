@@ -1,5 +1,5 @@
 # LearnToPlayGames
-Learning various games based on DRL(Deep Reinforcement Learning).  
+**Learning various games based on DRL(Deep Reinforcement Learning)**
 
 - Supported games : Tetris(gym-tetris)  
 - DRL framework : rllib  
