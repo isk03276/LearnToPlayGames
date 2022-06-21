@@ -5,10 +5,10 @@ from ray.rllib.agents import ppo
 
 
 def get_ppo_config(framework:str = "torch",
-                   num_workers:int = 8,
-                   train_batch_size:int = 5000,
-                   rollout_fragment_length:int = 100,
-                   sgd_minibatch_size:int = 500,
+                   num_workers:int = 4,
+                   train_batch_size:int = 800,
+                   rollout_fragment_length:int = 200,
+                   sgd_minibatch_size:int = 128,
                    num_sgd_iter:int = 10,
                    vf_share_layers:bool = True,
                    use_lstm:bool = False,
