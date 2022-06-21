@@ -8,8 +8,10 @@ from ray.rllib.agents import ppo
 
 
 def get_env_generator(env_id:str):
-    if env_id == "TetrisA-v0":
+    if "tetris" in env_id.lower():
         from envs.tetris import make_tetris_env as env_generator
+    elif env_id =="unity":
+        from envs.base_unity_env import BaseUnityEnv as env_generator
     else:
         raise NotImplementedError
     return env_generator
@@ -64,6 +66,7 @@ def run(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Game environments to learn")
     parser.add_argument("--env-id", default="TetrisA-v0", type=str, help="game environment id: 'TetrisA-v0', ...")
+    parser.add_argument("--built-unity-file", type=str, help="Built unity game file")
     parser.add_argument("--ml-framework", default="torch", type=str, help="Machine learning framework(ex. 'torch', 'tf', ...)")
     parser.add_argument("--render", action="store_true", help="Turn on rendering")
     parser.add_argument("--num-gpus", default=1, type=int, help="Number of gpus for training")
