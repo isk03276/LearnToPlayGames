@@ -9,12 +9,13 @@ Supported DRL algorithms : PPO
 $ pip install -r requirements.txt
 '''
 
-## Execute
+## Train
 '''
-[Train]
 $ python main.py --save --num-gpus NUM_OF_GPUS(ex.1) --ml-framework ML_FRAMEWORK(ex.torch)
+'''
 
-[Test]
+## Test
+'''
 $ python main.py --test --load-from TRAINED_MODEL_PATH
 '''
 
