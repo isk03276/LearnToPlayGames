@@ -31,3 +31,16 @@ def resize_image(image:np.ndarray, width:int, height:int)-> np.ndarray:
     resized_image = cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
     resized_image = np.reshape(resized_image, (width, height, -1))
     return resized_image
+
+def normalize_image(image:np.ndarray)-> np.ndarray:
+    """
+    Normalize image. [0, 255] -> [0, 1]
+    Args:
+        image (np.ndarray): input image
+
+    Returns:
+        np.ndarray: normalized image
+    """
+    normalized_image = image.astype(np.float64)
+    normalized_image = normalized_image / 255.
+    return normalized_image

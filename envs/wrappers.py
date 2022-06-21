@@ -1,4 +1,4 @@
-from utils.image import rgb_to_gray, resize_image
+from utils.image import rgb_to_gray, resize_image, normalize_image
 import gym
 
     
@@ -16,7 +16,8 @@ class FrameProcessingWrapper(gym.ObservationWrapper):
     def observation(self, obs):
         gray_scaled_obs = rgb_to_gray(obs)
         resized_obs = resize_image(gray_scaled_obs, self.width, self.height)
-        return resized_obs
+        normalized_obs = normalize_image(resized_obs)
+        return normalized_obs
     
 
 class FrameRenderingWrapper(gym.Wrapper):
