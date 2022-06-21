@@ -8,8 +8,10 @@ from ray.rllib.agents import ppo
 
 
 def get_env_generator(env_id:str):
-    if env_id == "TetrisA-v0":
+    if "tetris" in env_id.lower():
         from envs.tetris import make_tetris_env as env_generator
+    elif env_id =="unity":
+        from envs.base_unity_env import BaseUnityEnv as env_generator
     else:
         raise NotImplementedError
     return env_generator
