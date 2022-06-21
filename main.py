@@ -17,7 +17,7 @@ def get_env_generator(env_id:str):
 def train(trainer, learning_iteration_num, to_save, save_interval):
     path_to_save = "checkpoints/" + make_folder_name()
 
-    status = "{:2d} reward {:6.2f} len {:4.2f}"
+    status = "[Train] {:2d} reward {:6.2f} len {:4.2f}"
     
     for iter in range(1, learning_iteration_num + 1):
         result = trainer.train()
@@ -34,18 +34,21 @@ def test(env, trainer, test_num):
         done = False
         obs = env.reset()
         rews = []
+        
+        status = "[Test] {:2d} reward {:6.2f} len {:4.2f}"
+        
         while not done:
             action = trainer.compute_action(obs)
             obs, rew, done, _ = env.step(action)
             rews.append(rew)
-        print("[{}/{}] Episde | rew : {}".format(ep + 1, test_num, sum(rews)/len(rews)))
+        print(status.format(ep + 1, sum(rews)/len(rews), len(rews)))
 
 def run(config):
     ray.init()
     env_id = config.env_id
     env_generator = get_env_generator(env_id) 
     tune.register_env(env_id, lambda _: env_generator(env_id, config.render))
-    trainer = ppo.PPOTrainer(env=env_id, config=get_ppo_config())
+    trainer = ppo.PPOTrainer(env=env_id, config=get_ppo_config(num_gpus=int(config.num_gpus)))
     
     if config.load_from is not None:
         load_model(trainer, config.load_from)
@@ -63,6 +66,7 @@ if __name__ == "__main__":
     parser.add_argument("--env-id", default="TetrisA-v0", type=str, help="game environment id: 'TetrisA-v0', ...")
     parser.add_argument("--ml-framework", default="torch", type=str, help="Machine learning framework(ex. 'torch', 'tensorflow', ...)")
     parser.add_argument("--render", action="store_true", help="Turn on rendering")
+    parser.add_argument("--num-gpus", default=1, type=int, help="Number of gpus for training")
     #model
     parser.add_argument("--save", action="store_true", help="Whether to save the model")
     parser.add_argument("--save-interval", type=int, default=20, help="Model save interval")
