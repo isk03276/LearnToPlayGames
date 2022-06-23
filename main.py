@@ -1,6 +1,6 @@
 import argparse
 
-from utils.rllib import save_model, load_model, make_folder_name, get_ppo_config
+from utils.rllib import save_model, load_model, make_folder_name, get_ppo_config, make_initial_hidden_state
 
 import ray
 from ray import tune
@@ -10,8 +10,6 @@ from ray.rllib.agents import ppo
 def get_env_generator(env_id:str):
     if "tetris" in env_id.lower():
         from envs.tetris import make_tetris_env as env_generator
-    elif env_id =="unity":
-        from envs.base_unity_env import BaseUnityEnv as env_generator
     else:
         raise NotImplementedError
     return env_generator
@@ -32,40 +30,47 @@ def train(trainer, learning_iteration_num, to_save, save_interval):
             save_model(trainer, path_to_save)
     
 def test(env, trainer, test_num):
+    use_lstm = trainer.config.get("model").get("use_lstm")
+    lstm_cell_size = trainer.config.get("model").get("lstm_cell_size")
     for ep in range(test_num):
         done = False
         obs = env.reset()
         rews = []
-        
+        if use_lstm:
+            hidden_state = make_initial_hidden_state(lstm_cell_size)
+            
         status = "[Test] {:2d} reward {:6.2f} len {:4.2f}"
-        
         while not done:
-            action = trainer.compute_action(obs)
+            if use_lstm:
+                action, hidden_state, _ = trainer.compute_action(obs, hidden_state)
+            else:
+                action = trainer.compute_action(obs)
             obs, rew, done, _ = env.step(action)
             rews.append(rew)
         print(status.format(ep + 1, sum(rews)/len(rews), len(rews)))
 
-def run(config):
+def run(args):
     ray.init()
-    env_id = config.env_id
+    env_id = args.env_id
     env_generator = get_env_generator(env_id) 
-    tune.register_env(env_id, lambda _: env_generator(env_id, config.render))
-    trainer = ppo.PPOTrainer(env=env_id, config=get_ppo_config(num_gpus=int(config.num_gpus), framework=config.ml_framework))
+    tune.register_env(env_id, lambda _: env_generator(env_id, args.render))
+    rllib_config = get_ppo_config(num_gpus=int(args.num_gpus), framework=args.ml_framework)
+    trainer = ppo.PPOTrainer(env=env_id, config=rllib_config)
     
-    if config.load_from is not None:
-        load_model(trainer, config.load_from)
+    if args.load_from is not None:
+        load_model(trainer, args.load_from)
         
     if not args.test:
-        train(trainer, config.learning_iteration_num, config.save, config.save_interval)
+        train(trainer, args.learning_iteration_num, args.save, args.save_interval)
     test_env = env_generator(env_id, render=True)
-    test(test_env, trainer, config.test_num)
+    test(test_env, trainer, args.test_num)
     
     ray.shutdown()
     
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Game environments to learn")
-    parser.add_argument("--env-id", default="TetrisA-v0", type=str, help="game environment id: 'TetrisA-v0', ...")
+    parser.add_argument("--env-id", default="TetrisA-v3", type=str, help="game environment id: 'TetrisA-v0', ...")
     parser.add_argument("--ml-framework", default="torch", type=str, help="Machine learning framework(ex. 'torch', 'tf', ...)")
     parser.add_argument("--render", action="store_true", help="Turn on rendering")
     parser.add_argument("--num-gpus", default=1, type=int, help="Number of gpus for training")

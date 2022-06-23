@@ -1,5 +1,6 @@
 import datetime
 
+import numpy as np
 from ray.rllib.agents.trainer import Trainer
 from ray.rllib.agents import ppo
 
@@ -11,7 +12,7 @@ def get_ppo_config(framework:str = "torch",
                    sgd_minibatch_size:int = 64,
                    num_sgd_iter:int = 10,
                    vf_share_layers:bool = True,
-                   use_lstm:bool = False,
+                   use_lstm:bool = True,
                    lstm_cell_size:int = 256,
                    num_gpus:int = 1,
                    log_level:str = "ERROR")-> dict:
@@ -50,6 +51,18 @@ def get_ppo_config(framework:str = "torch",
     return rllib_config
 
 
+def make_initial_hidden_state(lstm_cell_size:int)-> list:
+    """
+    Make initial hidden state for testing lstm-based policy network.
+    Args:
+        lstm_cell_size (int): lstm cell size
+
+    Returns:
+        list: hidden state
+    """
+    hidden_state = [np.zeros(lstm_cell_size), np.zeros(lstm_cell_size)]
+    return hidden_state
+    
 def make_folder_name()-> str:
     """
     Generate current time as string.
