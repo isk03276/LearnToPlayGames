@@ -6,9 +6,9 @@ from ray.rllib.agents import ppo
 
 def get_ppo_config(framework:str = "torch",
                    num_workers:int = 4,
-                   train_batch_size:int = 800,
-                   rollout_fragment_length:int = 200,
-                   sgd_minibatch_size:int = 128,
+                   train_batch_size:int = 2000,
+                   rollout_fragment_length:int = 250,
+                   sgd_minibatch_size:int = 64,
                    num_sgd_iter:int = 10,
                    vf_share_layers:bool = True,
                    use_lstm:bool = False,
@@ -46,6 +46,7 @@ def get_ppo_config(framework:str = "torch",
     rllib_config['model']['lstm_cell_size'] = lstm_cell_size
     rllib_config['num_gpus'] = num_gpus
     rllib_config['log_level'] = log_level
+    rllib_config['batch_mode'] = "complete_episodes"
     return rllib_config
 
 
