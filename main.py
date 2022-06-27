@@ -1,6 +1,7 @@
 import argparse
 
-from utils.rllib import save_model, load_model, make_folder_name, get_ppo_config
+from utils.rllib import save_model, load_model, make_folder_name
+from utils.config import load_config
 
 import ray
 from ray import tune
@@ -45,20 +46,21 @@ def test(env, trainer, test_num):
             rews.append(rew)
         print(status.format(ep + 1, sum(rews)/len(rews), len(rews)))
 
-def run(config):
+def run(args):
     ray.init()
-    env_id = config.env_id
+    env_id = args.env_id
     env_generator = get_env_generator(env_id) 
-    tune.register_env(env_id, lambda _: env_generator(env_id, config.render))
-    trainer = ppo.PPOTrainer(env=env_id, config=get_ppo_config(num_gpus=int(config.num_gpus), framework=config.ml_framework))
+    tune.register_env(env_id, lambda _: env_generator(env_id, args.render))
+    rllib_configs = load_config(args.config_file_path)
+    trainer = ppo.PPOTrainer(env=env_id, config=rllib_configs)
     
-    if config.load_from is not None:
-        load_model(trainer, config.load_from)
+    if args.load_from is not None:
+        load_model(trainer, args.load_from)
         
     if not args.test:
-        train(trainer, config.learning_iteration_num, config.save, config.save_interval)
+        train(trainer, args.learning_iteration_num, args.save, args.save_interval)
     test_env = env_generator(env_id, render=True)
-    test(test_env, trainer, config.test_num)
+    test(test_env, trainer, args.test_num)
     
     ray.shutdown()
     
@@ -67,9 +69,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Game environments to learn")
     parser.add_argument("--env-id", default="TetrisA-v0", type=str, help="game environment id: 'TetrisA-v0', ...")
     parser.add_argument("--built-unity-file", type=str, help="Built unity game file")
-    parser.add_argument("--ml-framework", default="torch", type=str, help="Machine learning framework(ex. 'torch', 'tf', ...)")
+    parser.add_argument("--config-file-path", default="configs/default_config.yaml", type=str, help="Rllib config file path")
     parser.add_argument("--render", action="store_true", help="Turn on rendering")
-    parser.add_argument("--num-gpus", default=1, type=int, help="Number of gpus for training")
     #model
     parser.add_argument("--save", action="store_true", help="Whether to save the model")
     parser.add_argument("--save-interval", type=int, default=20, help="Model save interval")
