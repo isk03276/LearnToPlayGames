@@ -1,6 +1,6 @@
 import argparse
 
-from utils.rllib import save_model, load_model, make_folder_name
+from utils.rllib import save_model, load_model, make_folder_name, make_initial_hidden_state
 from utils.config import load_config
 
 import ray
@@ -33,15 +33,21 @@ def train(trainer, learning_iteration_num, to_save, save_interval):
             save_model(trainer, path_to_save)
     
 def test(env, trainer, test_num):
+    use_lstm = trainer.config.get("model").get("use_lstm")
+    lstm_cell_size = trainer.config.get("model").get("lstm_cell_size")
     for ep in range(test_num):
         done = False
         obs = env.reset()
         rews = []
-        
+        if use_lstm:
+            hidden_state = make_initial_hidden_state(lstm_cell_size)
+            
         status = "[Test] {:2d} reward {:6.2f} len {:4.2f}"
-        
         while not done:
-            action = trainer.compute_action(obs)
+            if use_lstm:
+                action, hidden_state, _ = trainer.compute_action(obs, hidden_state)
+            else:
+                action = trainer.compute_action(obs)
             obs, rew, done, _ = env.step(action)
             rews.append(rew)
         print(status.format(ep + 1, sum(rews)/len(rews), len(rews)))

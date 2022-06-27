@@ -1,9 +1,21 @@
 import datetime
 
+import numpy as np
 from ray.rllib.agents.trainer import Trainer
-from ray.rllib.agents import ppo
 
 
+def make_initial_hidden_state(lstm_cell_size:int)-> list:
+    """
+    Make initial hidden state for testing lstm-based policy network.
+    Args:
+        lstm_cell_size (int): lstm cell size
+
+    Returns:
+        list: hidden state
+    """
+    hidden_state = [np.zeros(lstm_cell_size), np.zeros(lstm_cell_size)]
+    return hidden_state
+    
 def make_folder_name()-> str:
     """
     Generate current time as string.

@@ -10,7 +10,7 @@ model:
   lstm_cell_size: 256
 # Whether to clip actions to the action space's low/high range spec.
 clip_actions: true
-num_gpus: 0
+num_gpus: 1
 num_workers: 4
 framework: torch
 lambda: 0.95
