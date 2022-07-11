@@ -1,16 +1,9 @@
 # LearnToPlayGames
-**Learning various games based on DRL(Deep Reinforcement Learning)**
+Learning various games based on DRL(Deep Reinforcement Learning).  
 
 - Supported games : Tetris(gym-tetris)  
 - DRL framework : rllib  
 - Supported DRL algorithms : PPO  
-
-|Tasks|Learned Task Example|Learning Curve|Description|
-|:---:|:---:|:---:|:---:|
-|**reach**|<img src="https://user-images.githubusercontent.com/23740495/178166394-40d4190d-54fe-4d86-9215-82fe99f71b62.gif" width="200" height="200"/>|<img src="https://user-images.githubusercontent.com/23740495/178166097-d6d2326f-2b63-455b-8489-94084f4a9fdf.png" width="300" height="200"/>|Controls the robot arm so that the end effector reaches the target point.|
-|Pick up|dd|dd|dd|
-
-
 
 
 ## Installation
@@ -34,7 +27,4 @@ The trained models are saved in the "checkpoints" directory.
 $ python main.py --test --load-from TRAINED_MODEL_PATH
 ~~~
 
-### Experiments
-[Reach]  
-![image](https://user-images.githubusercontent.com/23740495/178166097-d6d2326f-2b63-455b-8489-94084f4a9fdf.png)
-
+## Experiments
